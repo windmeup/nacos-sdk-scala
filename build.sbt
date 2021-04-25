@@ -1,28 +1,24 @@
-val versionScala212 = "2.12.12"
-val versionScala213 = "2.13.3"
-val versionAkka = "2.6.9"
-val versionNacos = "1.3.2"
-val versionPlay = "2.8.2"
-val versionConfig = "1.4.0"
-val versionScalaCollectionCompat = "2.2.0"
-val versionScalatest = "3.2.2"
+val versionAkka = "2.6.14"
+val versionNacos = "2.0.0"
+val versionPlay = "2.8.8"
+val versionConfig = "1.4.1"
+val versionScalaCollectionCompat = "2.4.3"
+val versionScalatest = "3.2.8"
 
-ThisBuild / scalaVersion := versionScala212
-
-ThisBuild / crossScalaVersions := Seq(versionScala212, versionScala213)
+ThisBuild / scalaVersion := "2.13.5"
 
 ThisBuild / scalafmtOnCompile := true
 
-ThisBuild / version := "1.3.2"
+ThisBuild / version := "2.0.0"
 
 lazy val root = Project(id = "nacos-sdk-scala", base = file("."))
   .aggregate(nacosDocs, nacosPlayWs, nacosAkka, nacosClientScala)
-  .settings(skip in publish := true)
+  .settings(publish / skip := true)
 
 lazy val nacosDocs = _project("nacos-docs")
   .enablePlugins(ParadoxMaterialThemePlugin, GhpagesPlugin)
   .dependsOn(nacosPlayWs, nacosAkka, nacosClientScala)
-  .settings(skip in publish := true)
+  .settings(publish / skip := true)
   .settings(
     Compile / paradoxMaterialTheme ~= {
       _.withLanguage(java.util.Locale.SIMPLIFIED_CHINESE)
@@ -34,12 +30,12 @@ lazy val nacosDocs = _project("nacos-docs")
           uri("https://weibo.com/yangbajing"))
     },
     paradoxProperties ++= Map(
-        "github.base_url" -> s"https://github.com/yangbajing/nacos-sdk-scala/tree/${version.value}",
-        "version" -> version.value,
-        "scala.version" -> scalaVersion.value,
-        "scala.binary_version" -> scalaBinaryVersion.value,
-        "scaladoc.akka.base_url" -> s"http://doc.akka.io/api/$versionAkka",
-        "akka.version" -> versionAkka),
+      "github.base_url" -> s"https://github.com/yangbajing/nacos-sdk-scala/tree/${version.value}",
+      "version" -> version.value,
+      "scala.version" -> scalaVersion.value,
+      "scala.binary_version" -> scalaBinaryVersion.value,
+      "scaladoc.akka.base_url" -> s"http://doc.akka.io/api/$versionAkka",
+      "akka.version" -> versionAkka),
     git.remoteRepo := "https://github.com/yangbajing/nacos-sdk-scala.git",
     //ThisProject / GitKeys.gitReader := baseDirectory(base => new DefaultReadableGit(base)).value,
     siteSourceDirectory := target.value / "paradox" / "site" / "main",
@@ -48,23 +44,23 @@ lazy val nacosDocs = _project("nacos-docs")
 lazy val nacosPlayWs = _project("nacos-play-ws")
   .dependsOn(nacosClientScala % "compile->compile;test->test")
   .settings(libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream-typed" % versionAkka,
-      "com.typesafe.akka" %% "akka-actor-testkit-typed" % versionAkka % Test,
-      ("com.typesafe.play" %% "play-ahc-ws" % versionPlay).excludeAll(ExclusionRule("com.typesafe.akka"))))
+    "com.typesafe.akka" %% "akka-stream-typed" % versionAkka,
+    "com.typesafe.akka" %% "akka-actor-testkit-typed" % versionAkka % Test,
+    ("com.typesafe.play" %% "play-ahc-ws" % versionPlay).excludeAll(ExclusionRule("com.typesafe.akka"))))
 
 lazy val nacosAkka = _project("nacos-akka")
   .dependsOn(nacosClientScala % "compile->compile;test->test")
   .settings(
     libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-actor-testkit-typed" % versionAkka % Test,
-        "com.typesafe.akka" %% "akka-discovery" % versionAkka))
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % versionAkka % Test,
+      "com.typesafe.akka" %% "akka-discovery" % versionAkka))
 
 lazy val nacosClientScala = _project("nacos-client-scala").settings(
   libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-collection-compat" % versionScalaCollectionCompat,
-      "com.typesafe" % "config" % versionConfig,
-      "com.alibaba.nacos" % "nacos-client" % versionNacos,
-      "org.scalatest" %% "scalatest" % versionScalatest % Test))
+    "org.scala-lang.modules" %% "scala-collection-compat" % versionScalaCollectionCompat,
+    "com.typesafe" % "config" % versionConfig,
+    "com.alibaba.nacos" % "nacos-client" % versionNacos,
+    "org.scalatest" %% "scalatest" % versionScalatest % Test))
 
 def _project(name: String, _base: String = null) =
   Project(id = name, base = file(if (_base eq null) name else _base))
@@ -97,44 +93,44 @@ def basicSettings =
         "-Ywarn-dead-code")
       (if (scalaVersion.value.startsWith("2.12")) "-target:jvm-1.8" else "-target:8") +: list
     },
-    javacOptions in Compile ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
-    javaOptions in run ++= Seq("-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
+    Compile / javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+    run / javaOptions ++= Seq("-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
     shellPrompt := { s =>
       Project.extract(s).currentProject.id + " > "
     },
-    test in assembly := {},
-    assemblyMergeStrategy in assembly := {
-      case PathList("javax", "servlet", xs @ _*)                => MergeStrategy.first
-      case PathList("io", "netty", xs @ _*)                     => MergeStrategy.first
-      case PathList("jnr", xs @ _*)                             => MergeStrategy.first
-      case PathList("com", "datastax", xs @ _*)                 => MergeStrategy.first
-      case PathList("com", "kenai", xs @ _*)                    => MergeStrategy.first
-      case PathList("org", "objectweb", xs @ _*)                => MergeStrategy.first
-      case PathList(ps @ _*) if ps.last.endsWith(".html")       => MergeStrategy.first
-      case "application.conf"                                   => MergeStrategy.concat
-      case "META-INF/io.netty.versions.properties"              => MergeStrategy.first
-      case PathList("org", "slf4j", xs @ _*)                    => MergeStrategy.first
+    assembly / test := {},
+    assembly / assemblyMergeStrategy := {
+      case PathList("javax", "servlet", xs@_*) => MergeStrategy.first
+      case PathList("io", "netty", xs@_*) => MergeStrategy.first
+      case PathList("jnr", xs@_*) => MergeStrategy.first
+      case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+      case PathList("com", "kenai", xs@_*) => MergeStrategy.first
+      case PathList("org", "objectweb", xs@_*) => MergeStrategy.first
+      case PathList(ps@_*) if ps.last.endsWith(".html") => MergeStrategy.first
+      case "application.conf" => MergeStrategy.concat
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.first
+      case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
       case "META-INF/native/libnetty-transport-native-epoll.so" => MergeStrategy.first
       case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     },
     libraryDependencies ++= Seq("ch.qos.logback" % "logback-classic" % "1.2.3" % Test),
-    fork in run := true,
-    fork in Test := true,
-    parallelExecution in Test := false)
+    run / fork := true,
+    Test / fork := true,
+    Test / parallelExecution := false)
 
 def publishing =
   Seq(
     bintrayOrganization := Some("helloscala"),
     bintrayRepository := "maven",
     developers := List(
-        Developer(
-          id = "yangbajing",
-          name = "Yang Jing",
-          email = "yang.xunjing@qq.com",
-          url = url("https://github.com/yangbajing"))),
+      Developer(
+        id = "yangbajing",
+        name = "Yang Jing",
+        email = "yang.xunjing@qq.com",
+        url = url("https://github.com/yangbajing"))),
     scmInfo := Some(
-        ScmInfo(
-          url("https://github.com/yangbajing/nacos-sdk-scala"),
-          "scm:git:git@github.com:yangbajing/nacos-sdk-scala.git")))
+      ScmInfo(
+        url("https://github.com/yangbajing/nacos-sdk-scala"),
+        "scm:git:git@github.com:yangbajing/nacos-sdk-scala.git")))

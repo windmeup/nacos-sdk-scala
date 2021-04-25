@@ -105,3 +105,4 @@ logs/
 standalone-logs/
 node_modules/
 init.d/
+/.bsp/
