@@ -1,8 +1,8 @@
 val versionAkka = "2.6.14"
 val versionNacos = "2.0.0"
 val versionPlay = "2.8.8"
-val versionConfig = "1.4.1"
-val versionScalaCollectionCompat = "2.4.3"
+val versionConfig = "1.4.0"
+//val versionScalaCollectionCompat = "2.4.3"
 val versionScalatest = "3.2.8"
 
 ThisBuild / scalaVersion := "2.13.5"
@@ -57,7 +57,7 @@ lazy val nacosAkka = _project("nacos-akka")
 
 lazy val nacosClientScala = _project("nacos-client-scala").settings(
   libraryDependencies ++= Seq(
-    "org.scala-lang.modules" %% "scala-collection-compat" % versionScalaCollectionCompat,
+//    "org.scala-lang.modules" %% "scala-collection-compat" % versionScalaCollectionCompat,
     "com.typesafe" % "config" % versionConfig,
     "com.alibaba.nacos" % "nacos-client" % versionNacos,
     "org.scalatest" %% "scalatest" % versionScalatest % Test))
