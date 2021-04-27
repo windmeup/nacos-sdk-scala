@@ -29,27 +29,32 @@ object ConfigUtils {
       Try(props.get(key) match {
         case n: java.lang.Number => n.intValue()
         case s: String           => s.toInt
+        case o                   => o.toString.toInt
       })
 
     def getLong(key: String): Try[Long] =
       Try(props.get(key) match {
         case n: java.lang.Number => n.longValue()
-        case s: String           => s.toInt
+        case s: String           => s.toLong
+        case o                   => o.toString.toLong
       })
 
     def getBoolean(key: String): Try[Boolean] =
-      Try(props.get(key) match {
+      Try(props.getOrDefault(key, "false") match {
         case b: java.lang.Boolean => b
         case s: String =>
-          if (s == null) false
-          else {
-            s.toLowerCase match {
-              case "on"  => true
-              case "off" => false
-              case text  => text.toBoolean
-            }
-          }
+          toBoolean(s)
+        case o =>
+          toBoolean(o.toString)
       })
+
+    private def toBoolean(s: String): Boolean = {
+      s.toLowerCase match {
+        case "on"  => true
+        case "off" => false
+        case text  => text.toBoolean
+      }
+    }
   }
 
   def discoveryConfig(config: Config): Config = {
